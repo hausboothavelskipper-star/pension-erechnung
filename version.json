@@ -1,0 +1,20 @@
+{
+  "version": "1.1.0",
+  "date": "2026-11-05",
+  "download": "pension-erechnung.html",
+  "changes": "Update-Funktion, Neuigkeiten und Datensicherung.",
+  "news": [
+    {
+      "id": "2026-11-erechnung",
+      "date": "2026-11-05",
+      "title": "E-Rechnungspflicht für Firmenkunden",
+      "text": "Ab 1.1.2027 Pflicht, wenn der Gesamtumsatz 2026 über 800.000 € lag, sonst ab 1.1.2028. Gilt nur für Rechnungen an Unternehmen. Privatgäste und Rechnungen bis 250 € brutto sind ausgenommen."
+    },
+    {
+      "id": "2026-01-ust-speisen",
+      "date": "2026-01-01",
+      "title": "7 % Umsatzsteuer auf Speisen",
+      "text": "Seit 1.1.2026 dauerhaft 7 % auf Speisen, auch beim Frühstück. Getränke, Parkplatz und WLAN bleiben bei 19 %, die Übernachtung bei 7 %."
+    }
+  ]
+}

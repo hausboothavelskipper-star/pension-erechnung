@@ -1,0 +1,508 @@
+<title>Pension 1685 E-Rechnung</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column — Stammdaten, Empfänger, Positionen, Prüfung & Ausgabe — like a Rechnungsblock von oben nach unten */
+:root{
+  --bg:#f3f5f6; --paper:#ffffff; --ink:#18242a; --muted:#5b6a71; --line:#d5dde0;
+  --accent:#1d5b6e; --accent-ink:#ffffff; --accent-soft:#e2eef1;
+  --ok:#1f7a4a; --ok-soft:#e3f3ea; --warn:#a15c07; --warn-soft:#fbefdc; --bad:#b3261e; --bad-soft:#fbe5e3;
+  --f-display:"Bitter",Georgia,serif; --f-body:"Libre Franklin",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11181b; --paper:#182226; --ink:#e4ecef; --muted:#93a4ab; --line:#2c3a40;
+  --accent:#6fb6c9; --accent-ink:#0d1a1e; --accent-soft:#1d3239;
+  --ok:#6cc995; --ok-soft:#183126; --warn:#e6a85a; --warn-soft:#33271a; --bad:#f08a82; --bad-soft:#3a1f1d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11181b; --paper:#182226; --ink:#e4ecef; --muted:#93a4ab; --line:#2c3a40;
+  --accent:#6fb6c9; --accent-ink:#0d1a1e; --accent-soft:#1d3239;
+  --ok:#6cc995; --ok-soft:#183126; --warn:#e6a85a; --warn-soft:#33271a; --bad:#f08a82; --bad-soft:#3a1f1d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+header h1{font-family:var(--f-display);font-weight:700;font-size:1.75rem;line-height:1.2;margin:0;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.std{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.04em;color:var(--accent);text-transform:uppercase}
+section,details.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px}
+h2,summary.h{font-family:var(--f-display);font-weight:500;font-size:1.15rem;margin:0}
+summary.h{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+summary.h::-webkit-details-marker{display:none}
+summary.h::after{content:"▾";color:var(--muted);transition:transform .15s}
+details[open]>summary.h::after{transform:rotate(180deg)}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px 14px;margin-top:14px}
+.c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}.c6{grid-column:span 6}
+@media (max-width:620px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.c2,.c3,.c4,.c6{grid-column:span 2}.c1m{grid-column:span 1}}
+label{display:grid;gap:4px;font-size:.8rem;font-weight:500;color:var(--muted);min-width:0}
+label .req{color:var(--accent)}
+input,select,textarea{font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input.num{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.sub{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;grid-column:1/-1;margin-top:6px;border-top:1px solid var(--line);padding-top:12px}
+.hint{font-size:.82rem;color:var(--muted);margin:10px 0 0;max-width:70ch}
+.tag{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--warn-soft);color:var(--warn);white-space:nowrap}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+/* positions */
+.lines{display:grid;gap:8px;margin-top:12px}
+.lrow{display:grid;grid-template-columns:minmax(0,3fr) 70px 104px 110px 86px 104px 34px;gap:8px;align-items:end}
+.lhead{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.lhead span:nth-child(n+2){text-align:right}
+.ltot{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums;padding:8px 0}
+.del{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:6px;height:38px;cursor:pointer;font-size:1.1rem}
+.del:hover{color:var(--bad);border-color:var(--bad)}
+.lrow label{display:contents}
+.lrow label>span{display:none}
+@media (max-width:700px){
+  .lhead{display:none}
+  .lrow{grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;padding:10px;gap:8px 10px}
+  .lrow label{display:grid}
+  .lrow label>span{display:block}
+  .lrow .f-desc{grid-column:1/-1}
+  .lrow .f-qty,.lrow .f-unit,.lrow .f-price,.lrow .f-rate{grid-column:span 2}
+  .lrow .ltot{grid-column:span 3;text-align:left;padding:6px 0}
+  .lrow .del{grid-column:span 1}
+}
+.btn{font:inherit;font-weight:600;font-size:.92rem;border-radius:7px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:6px 12px;font-size:.85rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* totals */
+.totals{display:grid;grid-template-columns:1fr auto;gap:4px 24px;margin-top:16px;max-width:380px;margin-left:auto;font-variant-numeric:tabular-nums}
+.totals dt{color:var(--muted)}
+.totals dd{margin:0;text-align:right;font-family:var(--f-mono)}
+.totals .grand{font-weight:600;color:var(--ink);border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.checks{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:6px}
+.checks li{display:flex;gap:10px;align-items:baseline;font-size:.9rem}
+.checks li::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:var(--bad);transform:translateY(-1px)}
+.checks li.ok::before{background:var(--ok)}
+.status{padding:10px 12px;border-radius:7px;font-size:.9rem;margin-top:12px}
+.status.ok{background:var(--ok-soft);color:var(--ok)}
+.status.bad{background:var(--bad-soft);color:var(--bad)}
+.status.info{background:var(--accent-soft);color:var(--ink)}
+pre.xml{font-family:var(--f-mono);font-size:.74rem;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px;overflow:auto;max-height:340px;margin:10px 0 0;white-space:pre}
+textarea.xml{font-family:var(--f-mono);font-size:.74rem;height:200px}
+.meta{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.news{list-style:none;padding:0;margin:4px 0 0;display:grid;gap:12px}
+.news li{display:grid;gap:2px;max-width:70ch}
+.news b{font-weight:600}
+.news .d{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.news .new{font-size:.68rem;font-weight:600;color:var(--accent);margin-left:6px;text-transform:uppercase;letter-spacing:.05em}
+#updBanner a{color:inherit;font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="std">XRechnung 3.0 · UN/CEFACT CII · EN 16931</div>
+  <h1>E-Rechnung für die Rathaus Pension 1685</h1>
+  <p>Daten eintragen, Prüfliste grün werden lassen, ZIP herunterladen. Darin liegen die eigentliche E-Rechnung (<span class="meta">.xml</span>) und eine lesbare Ansicht (<span class="meta">.html</span>) zum Mitschicken.</p>
+</header>
+
+<section id="newsCard">
+  <div class="head"><h2>Neuigkeiten und Updates</h2><span class="meta" id="verShow"></span></div>
+  <div id="updBanner" class="status info" hidden></div>
+  <ul class="news" id="news"></ul>
+  <div class="row" style="margin-top:12px" id="updRow">
+    <button class="btn small" id="btnCheck" type="button">Nach Updates suchen</button>
+    <span class="meta" id="updMsg"></span>
+  </div>
+</section>
+
+<details class="card" id="sellerCard">
+  <summary class="h">Stammdaten der GmbH <span class="tag" id="sellerTag">unvollständig</span></summary>
+  <div class="grid">
+    <label class="c6">Firmenname laut Handelsregister <span class="req">*</span><input id="s_name" autocomplete="organization"></label>
+    <label class="c4">Straße und Hausnummer <span class="req">*</span><input id="s_street"></label>
+    <label class="c2 c1m">PLZ <span class="req">*</span><input id="s_zip" inputmode="numeric"></label>
+    <label class="c4 c1m">Ort <span class="req">*</span><input id="s_city"></label>
+    <label class="c2">Land<input id="s_country" value="DE" maxlength="2"></label>
+    <div class="sub">Steuer und Register</div>
+    <label class="c3">USt-IdNr. (DE…)<input id="s_vatid" placeholder="DE123456789"></label>
+    <label class="c3">oder Steuernummer<input id="s_taxno" placeholder="048/123/45678"></label>
+    <label class="c3">Handelsregister<input id="s_hrb" placeholder="HRB 12345 P, Amtsgericht Potsdam"></label>
+    <label class="c3">Geschäftsführer<input id="s_gf"></label>
+    <div class="sub">Kontakt (Pflicht bei XRechnung)</div>
+    <label class="c2">Ansprechpartner <span class="req">*</span><input id="s_contact"></label>
+    <label class="c2">Telefon <span class="req">*</span><input id="s_phone" type="tel"></label>
+    <label class="c2">E-Mail <span class="req">*</span><input id="s_email" type="email"></label>
+    <div class="sub">Bankverbindung</div>
+    <label class="c4">IBAN <span class="req">*</span><input id="s_iban" placeholder="DE00 0000 0000 0000 0000 00"></label>
+    <label class="c2">BIC<input id="s_bic"></label>
+    <label class="c3">Kontoinhaber<input id="s_accname"></label>
+    <label class="c3">Bank<input id="s_bank"></label>
+    <div class="sub">Einstellungen</div>
+    <label class="c2 c1m">Zahlungsziel (Tage)<input id="s_days" class="num" type="number" min="0" value="14"></label>
+    <label class="c2 c1m">Nächste Rechnungsnr.<input id="s_next" class="num" type="number" min="1" value="1"></label>
+    <label class="c2">Präfix<input id="s_prefix" value="RE-2026-"></label>
+    <label class="c6">Update-Adresse<input id="s_update" placeholder="https://…github.io/pension-erechnung/version.json"></label>
+  </div>
+  <p class="hint">Wird nur in diesem Browser gespeichert. Vor jedem Update und für ein zweites Gerät: Sicherung speichern und dort wieder laden.</p>
+  <div class="row" style="margin-top:10px">
+    <button class="btn small" id="btnBackup" type="button">Sicherung speichern</button>
+    <label class="btn small" style="display:inline-block;color:var(--ink)">Sicherung laden<input id="restoreFile" type="file" accept=".json,application/json" hidden></label>
+  </div>
+</details>
+
+<section>
+  <div class="head"><h2>Rechnungsempfänger</h2><span class="tag" id="buyerTag">Beispiel</span></div>
+  <div class="grid" style="margin-top:0">
+    <label class="c4">Firma / Name <span class="req">*</span><input id="b_name"></label>
+    <label class="c2">Ansprechpartner<input id="b_contact"></label>
+    <label class="c4">Straße und Hausnummer <span class="req">*</span><input id="b_street"></label>
+    <label class="c2 c1m">PLZ <span class="req">*</span><input id="b_zip"></label>
+    <label class="c3 c1m">Ort <span class="req">*</span><input id="b_city"></label>
+    <label class="c1m">Land<input id="b_country" maxlength="2"></label>
+    <label class="c2">USt-IdNr. Kunde<input id="b_vatid"></label>
+    <label class="c3">E-Mail für E-Rechnung <span class="req">*</span><input id="b_email" type="email"></label>
+    <label class="c3">Käuferreferenz / Leitweg-ID<input id="b_ref" placeholder="leer = Rechnungsnummer"></label>
+  </div>
+  <p class="hint">E-Rechnungen braucht ihr nur für Firmenkunden (B2B). Privatgäste bekommen weiter eine normale Rechnung.</p>
+</section>
+
+<section>
+  <div class="head"><h2>Aufenthalt und Positionen</h2><span class="meta" id="invNoShow"></span></div>
+  <div class="grid" style="margin-top:0">
+    <label class="c2">Rechnungsnummer <span class="req">*</span><input id="i_no"></label>
+    <label class="c2 c1m">Rechnungsdatum <span class="req">*</span><input id="i_date" type="date"></label>
+    <label class="c2 c1m">Anzahlung erhalten (€)<input id="i_prepaid" class="num" inputmode="decimal" placeholder="0,00"></label>
+    <label class="c2 c1m">Anreise <span class="req">*</span><input id="i_from" type="date"></label>
+    <label class="c2 c1m">Abreise <span class="req">*</span><input id="i_to" type="date"></label>
+    <label class="c2">Gäste<input id="i_guests" placeholder="z. B. Hr. Muster, Fr. Beispiel"></label>
+  </div>
+  <div class="lines" id="lines">
+    <div class="lrow lhead"><span>Leistung</span><span>Menge</span><span>Einheit</span><span>Preis brutto</span><span>USt</span><span>Netto</span><span></span></div>
+  </div>
+  <div class="row" style="margin-top:10px"><button class="btn small" id="addLine" type="button">+ Position</button></div>
+  <p class="hint">Preise werden brutto eingegeben, das Tool rechnet netto. Übernachtung 7 %. Speisen (auch Frühstück) seit 2026 ebenfalls 7 %, Getränke, Parkplatz und WLAN 19 %.</p>
+  <dl class="totals" id="totals"></dl>
+</section>
+
+<section>
+  <h2>Prüfen und erstellen</h2>
+  <ul class="checks" id="checks"></ul>
+  <div class="row" style="margin-top:16px">
+    <button class="btn pri" id="btnZip" type="button">E-Rechnung herunterladen (.zip)</button>
+    <button class="btn" id="btnCopy" type="button">XML kopieren</button>
+    <button class="btn" id="btnNew" type="button">Neue Rechnung</button>
+  </div>
+  <div id="status" hidden></div>
+  <details style="margin-top:14px"><summary class="meta" style="cursor:pointer">XML ansehen</summary><pre class="xml" id="xmlOut"></pre></details>
+  <textarea class="xml" id="xmlFallback" readonly hidden aria-label="XML zum Kopieren"></textarea>
+</section>
+</div>
+
+<script>
+/* ===== LOGIC-START ===== */
+const r2 = x => Math.round((x + Number.EPSILON) * 100) / 100;
+const r4 = x => Math.round((x + Number.EPSILON) * 10000) / 10000;
+const f2 = x => r2(x).toFixed(2);
+const parseNum = s => { if (typeof s === 'number') return s; s = String(s||'').trim().replace(/\s/g,''); if (!s) return 0; if (s.includes(',')) s = s.replace(/\./g,'').replace(',', '.'); const n = parseFloat(s); return isFinite(n) ? n : 0; };
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const d102 = iso => String(iso||'').replace(/-/g,'');
+const UNITS = { DAY:'Nacht', H87:'Stück', LS:'Pauschale' };
+
+function compute(inv){
+  const lines = inv.lines.filter(l => (l.desc||'').trim() && parseNum(l.qty) > 0).map((l,i) => {
+    const qty = parseNum(l.qty), rate = Number(l.rate), gross = parseNum(l.price);
+    const net = r4(gross / (1 + rate/100));
+    return { id: i+1, desc: l.desc.trim(), qty, unit: l.unit, rate, net, total: r2(qty * net) };
+  });
+  const groups = {};
+  lines.forEach(l => { (groups[l.rate] ||= { rate:l.rate, basis:0 }).basis = r2(groups[l.rate].basis + l.total); });
+  const taxes = Object.values(groups).sort((a,b)=>a.rate-b.rate).map(g => ({ ...g, tax: r2(g.basis * g.rate / 100) }));
+  const lineTotal = r2(lines.reduce((s,l)=>s+l.total,0));
+  const taxTotal = r2(taxes.reduce((s,t)=>s+t.tax,0));
+  const grand = r2(lineTotal + taxTotal);
+  const prepaid = r2(parseNum(inv.prepaid));
+  return { lines, taxes, lineTotal, taxTotal, grand, prepaid, due: r2(grand - prepaid) };
+}
+function dueDate(inv){ const d = new Date((inv.date||'1970-01-01') + 'T12:00:00'); d.setDate(d.getDate() + (parseInt(inv.s.days,10)||0)); return d.toISOString().slice(0,10); }
+
+function buildXml(inv){
+  const s = inv.s, b = inv.b, c = compute(inv), due = dueDate(inv);
+  const iban = (s.iban||'').replace(/\s/g,'').toUpperCase();
+  const legal = [s.gf && 'Geschäftsführer: ' + s.gf, s.hrb].filter(Boolean).join(', ');
+  const notes = [];
+  if (inv.guests) notes.push('Gäste: ' + inv.guests);
+  notes.push('Aufenthalt vom ' + deDate(inv.from) + ' bis ' + deDate(inv.to) + '.');
+  const L = [];
+  L.push('<?xml version="1.0" encoding="UTF-8"?>');
+  L.push('<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">');
+  L.push('<rsm:ExchangedDocumentContext>');
+  L.push('<ram:BusinessProcessSpecifiedDocumentContextParameter><ram:ID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ram:ID></ram:BusinessProcessSpecifiedDocumentContextParameter>');
+  L.push('<ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter>');
+  L.push('</rsm:ExchangedDocumentContext>');
+  L.push('<rsm:ExchangedDocument>');
+  L.push('<ram:ID>' + esc(inv.no) + '</ram:ID><ram:TypeCode>380</ram:TypeCode>');
+  L.push('<ram:IssueDateTime><udt:DateTimeString format="102">' + d102(inv.date) + '</udt:DateTimeString></ram:IssueDateTime>');
+  notes.forEach(n => L.push('<ram:IncludedNote><ram:Content>' + esc(n) + '</ram:Content></ram:IncludedNote>'));
+  L.push('</rsm:ExchangedDocument>');
+  L.push('<rsm:SupplyChainTradeTransaction>');
+  c.lines.forEach(l => {
+    L.push('<ram:IncludedSupplyChainTradeLineItem>');
+    L.push('<ram:AssociatedDocumentLineDocument><ram:LineID>' + l.id + '</ram:LineID></ram:AssociatedDocumentLineDocument>');
+    L.push('<ram:SpecifiedTradeProduct><ram:Name>' + esc(l.desc) + '</ram:Name></ram:SpecifiedTradeProduct>');
+    L.push('<ram:SpecifiedLineTradeAgreement><ram:NetPriceProductTradePrice><ram:ChargeAmount>' + l.net.toFixed(4) + '</ram:ChargeAmount></ram:NetPriceProductTradePrice></ram:SpecifiedLineTradeAgreement>');
+    L.push('<ram:SpecifiedLineTradeDelivery><ram:BilledQuantity unitCode="' + l.unit + '">' + l.qty + '</ram:BilledQuantity></ram:SpecifiedLineTradeDelivery>');
+    L.push('<ram:SpecifiedLineTradeSettlement><ram:ApplicableTradeTax><ram:TypeCode>VAT</ram:TypeCode><ram:CategoryCode>S</ram:CategoryCode><ram:RateApplicablePercent>' + l.rate.toFixed(2) + '</ram:RateApplicablePercent></ram:ApplicableTradeTax>');
+    L.push('<ram:SpecifiedTradeSettlementLineMonetarySummation><ram:LineTotalAmount>' + f2(l.total) + '</ram:LineTotalAmount></ram:SpecifiedTradeSettlementLineMonetarySummation></ram:SpecifiedLineTradeSettlement>');
+    L.push('</ram:IncludedSupplyChainTradeLineItem>');
+  });
+  L.push('<ram:ApplicableHeaderTradeAgreement>');
+  L.push('<ram:BuyerReference>' + esc(b.ref || inv.no) + '</ram:BuyerReference>');
+  L.push('<ram:SellerTradeParty><ram:Name>' + esc(s.name) + '</ram:Name>');
+  if (legal) L.push('<ram:Description>' + esc(legal) + '</ram:Description>');
+  L.push('<ram:DefinedTradeContact><ram:PersonName>' + esc(s.contact) + '</ram:PersonName><ram:TelephoneUniversalCommunication><ram:CompleteNumber>' + esc(s.phone) + '</ram:CompleteNumber></ram:TelephoneUniversalCommunication><ram:EmailURIUniversalCommunication><ram:URIID>' + esc(s.email) + '</ram:URIID></ram:EmailURIUniversalCommunication></ram:DefinedTradeContact>');
+  L.push('<ram:PostalTradeAddress><ram:PostcodeCode>' + esc(s.zip) + '</ram:PostcodeCode><ram:LineOne>' + esc(s.street) + '</ram:LineOne><ram:CityName>' + esc(s.city) + '</ram:CityName><ram:CountryID>' + esc((s.country||'DE').toUpperCase()) + '</ram:CountryID></ram:PostalTradeAddress>');
+  L.push('<ram:URIUniversalCommunication><ram:URIID schemeID="EM">' + esc(s.email) + '</ram:URIID></ram:URIUniversalCommunication>');
+  if (s.taxno) L.push('<ram:SpecifiedTaxRegistration><ram:ID schemeID="FC">' + esc(s.taxno) + '</ram:ID></ram:SpecifiedTaxRegistration>');
+  if (s.vatid) L.push('<ram:SpecifiedTaxRegistration><ram:ID schemeID="VA">' + esc(s.vatid.replace(/\s/g,'')) + '</ram:ID></ram:SpecifiedTaxRegistration>');
+  L.push('</ram:SellerTradeParty>');
+  L.push('<ram:BuyerTradeParty><ram:Name>' + esc(b.name) + '</ram:Name>');
+  if (b.contact) L.push('<ram:DefinedTradeContact><ram:PersonName>' + esc(b.contact) + '</ram:PersonName></ram:DefinedTradeContact>');
+  L.push('<ram:PostalTradeAddress><ram:PostcodeCode>' + esc(b.zip) + '</ram:PostcodeCode><ram:LineOne>' + esc(b.street) + '</ram:LineOne><ram:CityName>' + esc(b.city) + '</ram:CityName><ram:CountryID>' + esc((b.country||'DE').toUpperCase()) + '</ram:CountryID></ram:PostalTradeAddress>');
+  L.push('<ram:URIUniversalCommunication><ram:URIID schemeID="EM">' + esc(b.email) + '</ram:URIID></ram:URIUniversalCommunication>');
+  if (b.vatid) L.push('<ram:SpecifiedTaxRegistration><ram:ID schemeID="VA">' + esc(b.vatid.replace(/\s/g,'')) + '</ram:ID></ram:SpecifiedTaxRegistration>');
+  L.push('</ram:BuyerTradeParty>');
+  L.push('</ram:ApplicableHeaderTradeAgreement>');
+  L.push('<ram:ApplicableHeaderTradeDelivery/>');
+  L.push('<ram:ApplicableHeaderTradeSettlement>');
+  L.push('<ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>');
+  L.push('<ram:SpecifiedTradeSettlementPaymentMeans><ram:TypeCode>58</ram:TypeCode><ram:PayeePartyCreditorFinancialAccount><ram:IBANID>' + esc(iban) + '</ram:IBANID>' + (s.accname ? '<ram:AccountName>' + esc(s.accname) + '</ram:AccountName>' : '') + '</ram:PayeePartyCreditorFinancialAccount>' + (s.bic ? '<ram:PayeeSpecifiedCreditorFinancialInstitution><ram:BICID>' + esc(s.bic.replace(/\s/g,'').toUpperCase()) + '</ram:BICID></ram:PayeeSpecifiedCreditorFinancialInstitution>' : '') + '</ram:SpecifiedTradeSettlementPaymentMeans>');
+  c.taxes.forEach(t => L.push('<ram:ApplicableTradeTax><ram:CalculatedAmount>' + f2(t.tax) + '</ram:CalculatedAmount><ram:TypeCode>VAT</ram:TypeCode><ram:BasisAmount>' + f2(t.basis) + '</ram:BasisAmount><ram:CategoryCode>S</ram:CategoryCode><ram:RateApplicablePercent>' + t.rate.toFixed(2) + '</ram:RateApplicablePercent></ram:ApplicableTradeTax>'));
+  L.push('<ram:BillingSpecifiedPeriod><ram:StartDateTime><udt:DateTimeString format="102">' + d102(inv.from) + '</udt:DateTimeString></ram:StartDateTime><ram:EndDateTime><udt:DateTimeString format="102">' + d102(inv.to) + '</udt:DateTimeString></ram:EndDateTime></ram:BillingSpecifiedPeriod>');
+  L.push('<ram:SpecifiedTradePaymentTerms><ram:Description>Zahlbar ohne Abzug bis ' + deDate(due) + '.</ram:Description><ram:DueDateDateTime><udt:DateTimeString format="102">' + d102(due) + '</udt:DateTimeString></ram:DueDateDateTime></ram:SpecifiedTradePaymentTerms>');
+  L.push('<ram:SpecifiedTradeSettlementHeaderMonetarySummation>');
+  L.push('<ram:LineTotalAmount>' + f2(c.lineTotal) + '</ram:LineTotalAmount><ram:TaxBasisTotalAmount>' + f2(c.lineTotal) + '</ram:TaxBasisTotalAmount><ram:TaxTotalAmount currencyID="EUR">' + f2(c.taxTotal) + '</ram:TaxTotalAmount><ram:GrandTotalAmount>' + f2(c.grand) + '</ram:GrandTotalAmount>' + (c.prepaid ? '<ram:TotalPrepaidAmount>' + f2(c.prepaid) + '</ram:TotalPrepaidAmount>' : '') + '<ram:DuePayableAmount>' + f2(c.due) + '</ram:DuePayableAmount>');
+  L.push('</ram:SpecifiedTradeSettlementHeaderMonetarySummation>');
+  L.push('</ram:ApplicableHeaderTradeSettlement>');
+  L.push('</rsm:SupplyChainTradeTransaction>');
+  L.push('</rsm:CrossIndustryInvoice>');
+  return L.join('\n');
+}
+function deDate(iso){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return d + '.' + m + '.' + y; }
+const eur = n => r2(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+
+function buildHtml(inv){
+  const s = inv.s, b = inv.b, c = compute(inv);
+  const rows = c.lines.map(l => '<tr><td>' + l.id + '</td><td>' + esc(l.desc) + '</td><td class="r">' + String(l.qty).replace('.',',') + ' ' + UNITS[l.unit] + '</td><td class="r">' + eur(l.net) + '</td><td class="r">' + l.rate + ' %</td><td class="r">' + eur(l.total) + '</td></tr>').join('');
+  const taxRows = c.taxes.map(t => '<tr><td>USt ' + t.rate + ' % auf ' + eur(t.basis) + '</td><td class="r">' + eur(t.tax) + '</td></tr>').join('');
+  const ids = [s.vatid && 'USt-IdNr. ' + esc(s.vatid), s.taxno && 'St.-Nr. ' + esc(s.taxno), s.hrb && esc(s.hrb), s.gf && 'Geschäftsführer: ' + esc(s.gf)].filter(Boolean).join(' · ');
+  return '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rechnung ' + esc(inv.no) + '</title><style>body{font-family:Georgia,serif;color:#1b1b1b;max-width:760px;margin:40px auto;padding:0 20px;font-size:14px;line-height:1.5}h1{font-size:22px;margin:30px 0 4px}.s{font-size:11px;color:#555;border-bottom:1px solid #999;padding-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{padding:6px 4px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}.r{text-align:right;white-space:nowrap}.sum{width:auto;margin-left:auto}.sum td{border:0;padding:2px 4px}.g td{font-weight:bold;border-top:1px solid #333}footer{margin-top:40px;font-size:11px;color:#555;border-top:1px solid #999;padding-top:8px}</style></head><body>'
+   + '<div class="s">' + esc(s.name) + ' · ' + esc(s.street) + ' · ' + esc(s.zip) + ' ' + esc(s.city) + '</div>'
+   + '<p>' + esc(b.name) + (b.contact ? '<br>' + esc(b.contact) : '') + '<br>' + esc(b.street) + '<br>' + esc(b.zip) + ' ' + esc(b.city) + '</p>'
+   + '<h1>Rechnung ' + esc(inv.no) + '</h1><p>Rechnungsdatum: ' + deDate(inv.date) + '<br>Leistungszeitraum: ' + deDate(inv.from) + ' bis ' + deDate(inv.to) + (inv.guests ? '<br>Gäste: ' + esc(inv.guests) : '') + (b.vatid ? '<br>USt-IdNr. Kunde: ' + esc(b.vatid) : '') + '</p>'
+   + '<table><thead><tr><th>Pos.</th><th>Leistung</th><th class="r">Menge</th><th class="r">Einzel netto</th><th class="r">USt</th><th class="r">Netto</th></tr></thead><tbody>' + rows + '</tbody></table>'
+   + '<table class="sum"><tr><td>Summe netto</td><td class="r">' + eur(c.lineTotal) + '</td></tr>' + taxRows + '<tr class="g"><td>Rechnungsbetrag</td><td class="r">' + eur(c.grand) + '</td></tr>' + (c.prepaid ? '<tr><td>abzgl. Anzahlung</td><td class="r">−' + eur(c.prepaid) + '</td></tr><tr class="g"><td>Zu zahlen</td><td class="r">' + eur(c.due) + '</td></tr>' : '') + '</table>'
+   + '<p>Bitte überweisen Sie den Betrag bis zum ' + deDate(dueDate(inv)) + ' unter Angabe der Rechnungsnummer auf: IBAN ' + esc(s.iban) + (s.bic ? ', BIC ' + esc(s.bic) : '') + (s.bank ? ' (' + esc(s.bank) + ')' : '') + '.</p>'
+   + '<p style="font-size:12px;color:#555">Diese Ansicht dient der Lesbarkeit. Maßgeblich ist die beigefügte E-Rechnung im XRechnung-Format (XML).</p>'
+   + '<footer>' + esc(s.name) + ' · ' + esc(s.street) + ', ' + esc(s.zip) + ' ' + esc(s.city) + '<br>' + esc(s.contact) + ' · ' + esc(s.phone) + ' · ' + esc(s.email) + (ids ? '<br>' + ids : '') + '</footer></body></html>';
+}
+
+/* minimal ZIP (stored, no compression) */
+const CRC = (() => { const t = new Uint32Array(256); for (let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(u8){ let c = 0xFFFFFFFF; for (let i=0;i<u8.length;i++) c = CRC[(c^u8[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function makeZip(files){
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const now = new Date(), dt = ((now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1)) & 0xFFFF, dd = (((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate()) & 0xFFFF;
+  for (const f of files){
+    const name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true); h.setUint16(10,dt,true); h.setUint16(12,dd,true);
+    h.setUint32(14,crc,true); h.setUint32(18,data.length,true); h.setUint32(22,data.length,true); h.setUint16(26,name.length,true); h.setUint16(28,0,true);
+    parts.push(new Uint8Array(h.buffer), name, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(10,0,true); c.setUint16(12,dt,true); c.setUint16(14,dd,true);
+    c.setUint32(16,crc,true); c.setUint32(20,data.length,true); c.setUint32(24,data.length,true); c.setUint16(28,name.length,true); c.setUint32(42,off,true);
+    central.push(new Uint8Array(c.buffer), name);
+    off += 30 + name.length + data.length;
+  }
+  const cSize = central.reduce((s,p)=>s+p.length,0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true); e.setUint16(8,files.length,true); e.setUint16(10,files.length,true); e.setUint32(12,cSize,true); e.setUint32(16,off,true);
+  const all = [...parts, ...central, new Uint8Array(e.buffer)], out = new Uint8Array(all.reduce((s,p)=>s+p.length,0));
+  let p = 0; for (const a of all){ out.set(a,p); p += a.length; } return out;
+}
+/* ===== LOGIC-END ===== */
+
+/* ===== VERSION ===== */
+const APP_VERSION = '1.1.0';
+const DEFAULT_UPDATE_URL = 'https://hausboothavelskipper-star.github.io/pension-erechnung/version.json';
+const NEWS = [
+  { id:'2026-11-erechnung', date:'2026-11-05', title:'E-Rechnungspflicht für Firmenkunden', text:'Ab 1.1.2027 Pflicht, wenn der Gesamtumsatz 2026 über 800.000 € lag, sonst ab 1.1.2028. Gilt nur für Rechnungen an Unternehmen. Privatgäste und Rechnungen bis 250 € brutto sind ausgenommen.' },
+  { id:'2026-01-ust-speisen', date:'2026-01-01', title:'7 % Umsatzsteuer auf Speisen', text:'Seit 1.1.2026 dauerhaft 7 % auf Speisen, auch beim Frühstück. Getränke, Parkplatz und WLAN bleiben bei 19 %, die Übernachtung bei 7 %.' }
+];
+/* ===== VERSION-END ===== */
+
+const $ = id => document.getElementById(id);
+const SK = 'rp1685-erechnung-v1';
+const SF = ['name','street','zip','city','country','vatid','taxno','hrb','gf','contact','phone','email','iban','bic','accname','bank','days','next','prefix','update'];
+const inFrame = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
+const verGt = (a,b) => { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i=0;i<3;i++){ if ((x[i]||0) !== (y[i]||0)) return (x[i]||0) > (y[i]||0); } return false; };
+let remoteNews = [];
+function renderNews(){
+  const seen = (() => { try { return JSON.parse(localStorage.getItem(SK+'-seen')||'[]'); } catch(e){ return []; } })();
+  const all = [...NEWS]; remoteNews.forEach(n => { if (n && n.id && !all.some(m => m.id === n.id)) all.push(n); });
+  all.sort((a,b) => String(b.date).localeCompare(String(a.date)));
+  $('news').innerHTML = all.slice(0,6).map(n => '<li><span class="d">' + esc(deDate(n.date)) + (seen.includes(n.id) ? '' : '<span class="new">neu</span>') + '</span><b>' + esc(n.title) + '</b><span>' + esc(n.text) + '</span></li>').join('');
+  try { localStorage.setItem(SK+'-seen', JSON.stringify(all.map(n => n.id))); } catch(e){}
+}
+async function checkUpdate(manual){
+  const url = (state.s.update || DEFAULT_UPDATE_URL || '').trim();
+  if (!url){ $('updMsg').textContent = 'Keine Update-Adresse eingetragen (Stammdaten → Einstellungen).'; return; }
+  $('updMsg').textContent = 'Suche …';
+  try {
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now(), { cache:'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const m = await res.json();
+    remoteNews = Array.isArray(m.news) ? m.news : [];
+    renderNews();
+    try { localStorage.setItem(SK+'-lastcheck', today()); } catch(e){}
+    const b = $('updBanner');
+    if (m.version && verGt(m.version, APP_VERSION)){
+      let dl = ''; try { dl = new URL(String(m.download || 'pension-erechnung.html'), url).href; } catch(e){}
+      b.innerHTML = '<b>Version ' + esc(m.version) + ' ist da.</b> ' + esc(m.changes || '') + (/^https?:\/\//.test(dl) ? ' <a href="' + esc(dl) + '" target="_blank" rel="noopener">Neue Version herunterladen</a>' : '') + '<br>Vorher „Sicherung speichern“. Die neue Datei an dieselbe Stelle legen und die alte ersetzen.';
+      b.hidden = false; $('updMsg').textContent = '';
+    } else { b.hidden = true; $('updMsg').textContent = 'Aktuell (Stand ' + deDate(today()) + ').'; }
+  } catch(e){
+    $('updMsg').textContent = manual ? 'Update-Server nicht erreichbar. Internetverbindung und Adresse prüfen.' : '';
+  }
+}
+function saveFile(name, data){
+  if (downloads) return downloads.save({ filename:name, data: data instanceof Blob ? data : new Blob([data]) });
+  if (inFrame) return Promise.reject({ code:'unavailable' });
+  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  return Promise.resolve({ status:'saved' });
+}
+const BF = ['name','contact','street','zip','city','country','vatid','email','ref'];
+const today = () => new Date().toISOString().slice(0,10);
+const addDays = (iso,n) => { const d = new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+const EXAMPLE = {
+  b:{ name:'Beispiel Bau GmbH', contact:'Frau Muster', street:'Musterstraße 1', zip:'14770', city:'Brandenburg an der Havel', country:'DE', vatid:'', email:'rechnung@beispiel-bau.de', ref:'' },
+  lines:[ {desc:'Übernachtung Einzelzimmer', qty:'3', unit:'DAY', price:'79,00', rate:7},
+          {desc:'Frühstück', qty:'3', unit:'H87', price:'12,00', rate:7},
+          {desc:'Parkplatz', qty:'3', unit:'DAY', price:'6,00', rate:19} ]
+};
+let state = { s:{ name:'Rathaus Pension 1685 GmbH', country:'DE', days:'14', next:'1', prefix:'RE-2026-' }, b:{...EXAMPLE.b}, lines:EXAMPLE.lines.map(l=>({...l})), example:true,
+  no:'', date:today(), from:addDays(today(),-3), to:today(), guests:'', prepaid:'' };
+try { const saved = JSON.parse(localStorage.getItem(SK) || 'null'); if (saved && saved.s) state = { ...state, ...saved }; } catch(e){}
+function save(){ try { localStorage.setItem(SK, JSON.stringify(state)); } catch(e){} }
+function nextNo(){ return (state.s.prefix||'') + String(parseInt(state.s.next,10)||1).padStart(4,'0'); }
+if (!state.no) state.no = nextNo();
+
+function bindFields(){
+  SF.forEach(k => { const el = $('s_'+k); el.value = state.s[k] ?? el.value; state.s[k] = el.value; el.addEventListener('input', () => { state.s[k] = el.value; if (k==='next'||k==='prefix'){ state.no = nextNo(); $('i_no').value = state.no; } update(); }); });
+  BF.forEach(k => { const el = $('b_'+k); el.value = state.b[k] ?? ''; el.addEventListener('input', () => { state.b[k] = el.value; state.example = false; update(); }); });
+  [['i_no','no'],['i_date','date'],['i_from','from'],['i_to','to'],['i_guests','guests'],['i_prepaid','prepaid']].forEach(([id,k]) => { const el = $(id); el.value = state[k] ?? ''; el.addEventListener('input', () => { state[k] = el.value; update(); }); });
+}
+function renderLines(){
+  const box = $('lines'); box.querySelectorAll('.lrow:not(.lhead)').forEach(n => n.remove());
+  state.lines.forEach((l,i) => {
+    const row = document.createElement('div'); row.className = 'lrow';
+    row.innerHTML = '<label class="f-desc"><span>Leistung</span><input id="l'+i+'_desc"></label>'
+      + '<label class="f-qty"><span>Menge</span><input id="l'+i+'_qty" class="num" inputmode="decimal"></label>'
+      + '<label class="f-unit"><span>Einheit</span><select id="l'+i+'_unit">' + Object.entries(UNITS).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('') + '</select></label>'
+      + '<label class="f-price"><span>Preis brutto €</span><input id="l'+i+'_price" class="num" inputmode="decimal"></label>'
+      + '<label class="f-rate"><span>USt</span><select id="l'+i+'_rate"><option value="7">7 %</option><option value="19">19 %</option></select></label>'
+      + '<div class="ltot" id="l'+i+'_tot"></div><button class="del" type="button" aria-label="Position entfernen">×</button>';
+    box.appendChild(row);
+    ['desc','qty','unit','price','rate'].forEach(k => { const el = $('l'+i+'_'+k); el.value = l[k]; el.addEventListener('input', () => { l[k] = k==='rate' ? Number(el.value) : el.value; state.example = false; update(); }); });
+    row.querySelector('.del').addEventListener('click', () => { state.lines.splice(i,1); renderLines(); update(); });
+  });
+}
+function checks(){
+  const s = state.s, b = state.b, c = compute(state), email = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||'');
+  const iban = (s.iban||'').replace(/\s/g,'');
+  return [
+    ['Firmenanschrift der GmbH', s.name && s.street && s.zip && s.city, 'seller'],
+    ['USt-IdNr. oder Steuernummer', s.vatid || s.taxno, 'seller'],
+    ['Ansprechpartner, Telefon, E-Mail der Pension', s.contact && s.phone && email(s.email), 'seller'],
+    ['IBAN', /^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/i.test(iban), 'seller'],
+    ['Empfänger mit Anschrift und E-Mail', b.name && b.street && b.zip && b.city && email(b.email)],
+    ['Rechnungsnummer und -datum', state.no && state.date],
+    ['Anreise und Abreise', state.from && state.to && state.from <= state.to],
+    ['Mindestens eine Position mit Preis', c.lines.length && c.lineTotal > 0],
+    ['Beispieldaten ersetzt', !state.example]
+  ];
+}
+function update(){
+  const c = compute(state);
+  state.lines.forEach((l,i) => { const el = $('l'+i+'_tot'); if (el){ const cl = c.lines.find(x => x.desc === (l.desc||'').trim() && x.qty === parseNum(l.qty)); el.textContent = (l.desc||'').trim() && parseNum(l.qty) > 0 ? eur(r2(parseNum(l.qty) * r4(parseNum(l.price)/(1+Number(l.rate)/100)))) : '–'; } });
+  $('totals').innerHTML = '<dt>Summe netto</dt><dd>' + eur(c.lineTotal) + '</dd>'
+    + c.taxes.map(t => '<dt>USt ' + t.rate + ' %</dt><dd>' + eur(t.tax) + '</dd>').join('')
+    + '<dt class="grand">Rechnungsbetrag</dt><dd class="grand">' + eur(c.grand) + '</dd>'
+    + (c.prepaid ? '<dt>Anzahlung</dt><dd>−' + eur(c.prepaid) + '</dd><dt class="grand">Zu zahlen</dt><dd class="grand">' + eur(c.due) + '</dd>' : '');
+  const list = checks(), allOk = list.every(x => x[1]);
+  $('checks').innerHTML = list.map(([t,ok]) => '<li class="' + (ok ? 'ok' : '') + '">' + t + '</li>').join('');
+  const sellerOk = list.filter(x => x[2]==='seller').every(x => x[1]);
+  $('sellerTag').textContent = sellerOk ? 'vollständig' : 'unvollständig'; $('sellerTag').classList.toggle('ok', sellerOk);
+  $('buyerTag').hidden = !state.example;
+  $('btnZip').disabled = !allOk; $('btnCopy').disabled = !allOk;
+  $('invNoShow').textContent = state.no;
+  $('xmlOut').textContent = buildXml(state);
+  save();
+}
+function status(msg, kind){ const el = $('status'); el.className = 'status ' + kind; el.textContent = msg; el.hidden = false; }
+function fileBase(){ return 'Rechnung_' + String(state.no).replace(/[^\w.-]+/g,'_'); }
+
+$('addLine').addEventListener('click', () => { state.lines.push({desc:'', qty:'1', unit:'DAY', price:'', rate:7}); renderLines(); update(); $('l'+(state.lines.length-1)+'_desc').focus(); });
+$('btnNew').addEventListener('click', () => {
+  state.b = {name:'',contact:'',street:'',zip:'',city:'',country:'DE',vatid:'',email:'',ref:''};
+  state.lines = [{desc:'Übernachtung', qty:'1', unit:'DAY', price:'', rate:7}];
+  state.example = false; state.no = nextNo(); state.date = today(); state.from = ''; state.to = ''; state.guests = ''; state.prepaid = '';
+  BF.forEach(k => $('b_'+k).value = state.b[k]);
+  [['i_no','no'],['i_date','date'],['i_from','from'],['i_to','to'],['i_guests','guests'],['i_prepaid','prepaid']].forEach(([id,k]) => $(id).value = state[k]);
+  renderLines(); update(); $('status').hidden = true; $('b_name').focus();
+});
+$('btnCopy').addEventListener('click', () => {
+  const xml = buildXml(state);
+  navigator.clipboard.writeText(xml).then(() => status('XML kopiert. In eine Datei mit Endung .xml einfügen.', 'ok'), () => { const t = $('xmlFallback'); t.value = xml; t.hidden = false; t.select(); status('Kopieren wurde blockiert. Der Text ist unten markiert, bitte selbst kopieren.', 'info'); });
+});
+let downloads = null;
+$('btnZip').addEventListener('click', async () => {
+  const zip = makeZip([{ name: fileBase() + '.xml', text: buildXml(state) }, { name: fileBase() + '_Ansicht.html', text: buildHtml(state) }]);
+  try {
+    await saveFile(fileBase() + '.zip', new Blob([zip], { type:'application/zip' }));
+    const used = state.no;
+    if (used === nextNo()) { state.s.next = String((parseInt(state.s.next,10)||1) + 1); $('s_next').value = state.s.next; }
+    update();
+    status('Gespeichert: ' + used + '. Die Datei .xml ist die E-Rechnung, die .html nur zum Lesen. Beides 8 Jahre aufbewahren. Nächste Nummer: ' + nextNo() + '.', 'ok');
+  } catch(e){
+    if (e && e.code === 'declined') status('Speichern abgebrochen.', 'info');
+    else if (e && e.code === 'rate_limited') status('Es ist schon ein Speichern-Dialog offen.', 'info');
+    else status('Herunterladen ist hier nicht möglich. Nutzt „XML kopieren“.', 'bad');
+  }
+});
+
+$('btnBackup').addEventListener('click', async () => {
+  const data = JSON.stringify({ app:'rp1685-erechnung', version:APP_VERSION, saved:new Date().toISOString(), s:state.s }, null, 2);
+  try { await saveFile('Pension1685_Sicherung_' + today() + '.json', new Blob([data], { type:'application/json' })); status('Sicherung gespeichert. Enthält Stammdaten und die nächste Rechnungsnummer.', 'ok'); }
+  catch(e){ status(e && e.code === 'declined' ? 'Speichern abgebrochen.' : 'Sicherung konnte hier nicht gespeichert werden.', 'info'); }
+});
+$('restoreFile').addEventListener('change', async ev => {
+  const f = ev.target.files && ev.target.files[0]; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.app !== 'rp1685-erechnung' || !d.s) throw new Error('fremd');
+    state.s = { ...state.s, ...d.s };
+    SF.forEach(k => { $('s_'+k).value = state.s[k] ?? ''; });
+    state.no = nextNo(); $('i_no').value = state.no;
+    update(); status('Sicherung vom ' + deDate(String(d.saved).slice(0,10)) + ' geladen. Nächste Nummer: ' + nextNo() + '.', 'ok');
+  } catch(e){ status('Diese Datei ist keine Sicherung aus diesem Programm.', 'bad'); }
+  ev.target.value = '';
+});
+$('btnCheck').addEventListener('click', () => checkUpdate(true));
+
+if (!state.s.update && DEFAULT_UPDATE_URL) state.s.update = DEFAULT_UPDATE_URL;
+bindFields(); renderLines(); update();
+$('verShow').textContent = 'Version ' + APP_VERSION;
+renderNews();
+if (inFrame){ $('updRow').innerHTML = '<span class="meta">Diese Online-Version wird automatisch aktualisiert.</span>'; }
+else { let last = ''; try { last = localStorage.getItem(SK+'-lastcheck') || ''; } catch(e){} if (last !== today()) checkUpdate(false); }
+$('sellerCard').open = !checks().filter(x => x[2]==='seller').every(x => x[1]);
+if (inFrame) (async () => { try { downloads = await window.claude?.use?.('downloads'); } catch(e){ downloads = null; } })();
+</script>

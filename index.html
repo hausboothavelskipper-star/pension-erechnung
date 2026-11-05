@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pension 1685 E-Rechnung</title>
+<style>
+:root{--bg:#f3f5f6;--paper:#fff;--ink:#18242a;--muted:#5b6a71;--line:#d5dde0;--accent:#1d5b6e;--accent-ink:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#11181b;--paper:#182226;--ink:#e4ecef;--muted:#93a4ab;--line:#2c3a40;--accent:#6fb6c9;--accent-ink:#0d1a1e;color-scheme:dark}}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:32px 16px;display:grid;gap:18px}
+h1{font-family:Georgia,serif;font-size:1.6rem;margin:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+a.btn{display:inline-block;text-decoration:none;font-weight:600;border-radius:7px;padding:10px 16px;border:1px solid var(--line);color:var(--ink)}
+a.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.meta{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:var(--muted)}
+ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+li b{display:block}
+</style></head><body><main>
+<div><div class="meta" id="ver">E-Rechnung · XRechnung 3.0</div><h1>E-Rechnung für die Rathaus Pension 1685</h1></div>
+<div class="card">
+  <p style="margin-top:0">Online öffnen und als Lesezeichen speichern, dann ist immer die neueste Version da. Oder als Datei speichern und offline nutzen.</p>
+  <div class="row">
+    <a class="btn pri" href="pension-erechnung.html">Online öffnen</a>
+    <a class="btn" href="pension-erechnung.html" download="pension-erechnung.html">Als Datei speichern</a>
+  </div>
+</div>
+<div class="card"><h2 style="margin-top:0;font-size:1.1rem">Neuigkeiten</h2><ul id="news"><li class="meta">Lädt …</li></ul></div>
+</main>
+<script>
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const de = d => d ? d.split('-').reverse().join('.') : '';
+fetch('version.json?t=' + Date.now(), {cache:'no-store'}).then(r => r.json()).then(m => {
+  document.getElementById('ver').textContent = 'Version ' + m.version + ' vom ' + de(m.date);
+  document.getElementById('news').innerHTML = (m.news || []).sort((a,b) => b.date.localeCompare(a.date)).map(n => '<li><span class="meta">' + de(n.date) + '</span><b>' + esc(n.title) + '</b>' + esc(n.text) + '</li>').join('');
+}).catch(() => { document.getElementById('news').innerHTML = '<li class="meta">Neuigkeiten konnten nicht geladen werden.</li>'; });
+</script></body></html>
